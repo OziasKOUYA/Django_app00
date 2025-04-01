@@ -1,0 +1,70 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<div class="content">
+    <div class="container-fluid">
+
+        <!-- Titre de page -->
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-flex justify-content-between align-items-center">
+                    <h4 class="page-title">Liste des Bus</h4>
+                    <a href="{% url 'add_bus' %}" class="btn btn-blue btn-sm">
+                        <i class="mdi mdi-plus-circle-outline"></i> Ajouter un bus
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tableau des bus -->
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="header-title mb-3">Liste complète</h4>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-centered table-nowrap mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Nom du bus</th>
+                                        <th>Plaque</th>
+                                        <th>Places</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for bus in buses %}
+                                    <tr>
+                                        <td>{{ bus.0 }}</td>
+                                        <td>{{ bus.1 }}</td>
+                                        <td>{{ bus.2 }}</td>
+                                        <td>{{ bus.3 }}</td>
+                                        <td>
+                                            <a href="{% url 'edit_bus' bus.0 %}" class="btn btn-xs btn-warning me-1">
+                                                <i class="mdi mdi-pencil"></i>
+                                            </a>
+                                            <a href="{% url 'delete_bus' bus.0 %}" class="btn btn-xs btn-danger">
+                                                <i class="mdi mdi-delete"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center">Aucun bus enregistré.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div> <!-- end .table-responsive -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
