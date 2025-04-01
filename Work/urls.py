@@ -3,7 +3,9 @@ from . import views
 
 urlpatterns = [
   
-        # Inclure les URLs de l'application
+    path('inscription_admin/', views.inscription_admin, name='inscription_admin'),
+    path('liste_admin/', views.liste_admin, name='liste_admin'),
+    path("inscription_client/", views.inscription_client, name="inscription_client"),
     path('test/', views.test, name='test' ),
     path('test2/', views.test2, name='test2' ),
 
