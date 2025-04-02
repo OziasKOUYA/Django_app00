@@ -3,68 +3,10 @@ from .db import get_connection
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.db import connection 
-import hashlib
-import uuid
-
 import MySQLdb
 
 
 
-
-
-
-
-
-
-
-def inscription_admin(request):
-
-    if request.method == "POST":
-        nom_complet = request.POST['nom_complet']
-        email = request.POST['email_admin']
-        mot_de_passe = request.POST['mot_de_passe']
-        hashed_password = hashlib.md5(mot_de_passe.encode()).hexdigest()
-
-        conn = get_connection()
-        cursor = conn.cursor()
-
-        cursor.execute("SELECT * FROM admin WHERE email_admin = %s", (email,))
-        if cursor.fetchone():
-            messages.error(request, "Cet email est déjà utilisé.")
-        else:
-            cursor.execute("INSERT INTO admin (nom_complet, email_admin, mot_de_passe) VALUES (%s, %s, %s)",
-                           (nom_complet, email, hashed_password))
-            conn.commit()
-            messages.success(request, "Compte admin créé avec succès !")
-            return redirect('liste_admin')
-
-        cursor.close()
-        conn.close()
-
-    return render(request, 'admin/ajouter_admin/cree_admin.html')
-
-def liste_admin(request):
-    connection = get_connection()
-    cursor = connection.cursor(MySQLdb.cursors.DictCursor)
-
-    cursor.execute("SELECT * FROM admin")
-    admins = cursor.fetchall()
-
-    connection.close()
-
-    return render(request, "admin/ajouter_admin/liste_admin.html", {
-        "admins": admins
-    })
-
-
-
-
-
-
-
-
-def hash_password(password):
-    return hashlib.md5(password.encode()).hexdigest()
 # Create your views here.
 def test(request):
     return render(request, 'admin/index.html')
@@ -128,51 +70,97 @@ def delete_bus(request, id):
 
 
 
-def inscription_client(request):
-    if request.method == "POST":
-        # Récupération des données avec strip() pour nettoyer
-        nom_complet = request.POST.get('nom_complet', '').strip()
-        email = request.POST.get('email_client', '').strip().lower()  # Normalisation en minuscules
-        mot_de_passe = request.POST.get('mot_de_passe', '')
-        confirmation_mot_de_passe = request.POST.get('confirmation_mot_de_passe', '')
 
-        # 1. Validation de l'email
-        if not email:
-            messages.error(request, "L'email est obligatoire.")
-            return redirect('inscription_client')
-        
-        if not validate_email(email):
-            messages.error(request, "Format d'email invalide. Veuillez entrer un email valide.")
-            return redirect('inscription_client')
+# Liste des voyages
+def list_voyages(request):
+    db = get_connection()
+    cursor = db.cursor()
+    cursor.execute("""
+        SELECT v.id_voyage, b.nom_du_bus, v.ville_depart, v.ville_arrivee, v.date_depart,
+               v.heure_depart, v.prix_ticket, v.places_disponibles, v.chauffeur, v.statut
+        FROM Voyage v
+        JOIN Bus b ON v.bus_id = b.id_bus
+    """)
+    voyages = cursor.fetchall()
+    db.close()
+    return render(request, 'admin/voyage/liste_voyage.html', {'voyages': voyages})
 
-        # 2. Vérification des mots de passe
-        if not mot_de_passe or len(mot_de_passe) < 8:
-            messages.error(request, "Le mot de passe doit contenir au moins 8 caractères.")
-            return redirect('inscription_client')
-        
-        if mot_de_passe != confirmation_mot_de_passe:
-            messages.error(request, "Les mots de passe ne correspondent pas.")
-            return redirect('inscription_client')
+# Ajouter un voyage
+def add_voyage(request):
+    db = get_connection()
+    cursor = db.cursor()
+    cursor.execute("SELECT id_bus, nom_du_bus FROM Bus")
+    bus_list = cursor.fetchall()
 
-        # 3. Vérification si l'email existe déjà
-        with connection.cursor() as cursor:
-            cursor.execute("SELECT id_client FROM client WHERE email_client = %s", [email])
-            if cursor.fetchone():
-                messages.error(request, "Cet email est déjà utilisé.")
-                return redirect('inscription_client')
+    if request.method == 'POST':
+        data = (
+            request.POST['bus_id'],
+            request.POST['ville_depart'],
+            request.POST['ville_arrivee'],
+            request.POST['date_depart'],
+            request.POST['heure_depart'],
+            request.POST['prix_ticket'],
+            request.POST['places_disponibles'],
+            request.POST['chauffeur'],
+            request.POST['statut']
+        )
+        cursor.execute("""
+            INSERT INTO Voyage (
+                bus_id, ville_depart, ville_arrivee, date_depart,
+                heure_depart, prix_ticket, places_disponibles, chauffeur, statut
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """, data)
+        db.commit()
+        db.close()
+        return redirect('list_voyages')
+    
+    db.close()
+    return render(request, 'admin/voyage/ajout_voyage.html', {'bus_list': bus_list})
 
-            # Tout est valide → Hachage et enregistrement
-            hashed_password = hash_password(mot_de_passe)
-            verification_token = str(uuid.uuid4())
+# Modifier un voyage
+def edit_voyage(request, id):
+    db = get_connection()
+    cursor = db.cursor()
+    cursor.execute("SELECT id_bus, nom_du_bus FROM Bus")
+    bus_list = cursor.fetchall()
 
-            cursor.execute(
-                "INSERT INTO client (nom_complet, email_client, mot_de_passe, verification_token, is_verified) "
-                "VALUES (%s, %s, %s, %s, %s)",
-                [nom_complet, email, hashed_password, verification_token, False]
-            )
+    if request.method == 'POST':
+        data = (
+            request.POST['bus_id'],
+            request.POST['ville_depart'],
+            request.POST['ville_arrivee'],
+            request.POST['date_depart'],
+            request.POST['heure_depart'],
+            request.POST['prix_ticket'],
+            request.POST['places_disponibles'],
+            request.POST['chauffeur'],
+            request.POST['statut'],
+            id
+        )
+        cursor.execute("""
+            UPDATE Voyage SET
+                bus_id=%s, ville_depart=%s, ville_arrivee=%s, date_depart=%s,
+                heure_depart=%s, prix_ticket=%s, places_disponibles=%s,
+                chauffeur=%s, statut=%s
+            WHERE id_voyage=%s
+        """, data)
+        db.commit()
+        db.close()
+        return redirect('list_voyages')
 
-        messages.success(request, "Inscription réussie!")
-        return redirect('login')
+    cursor.execute("SELECT * FROM Voyage WHERE id_voyage = %s", (id,))
+    voyage = cursor.fetchone()
+    db.close()
+    return render(request, 'admin/voyage/modifier_voyage.html', {'voyage': voyage, 'bus_list': bus_list})
 
-    return render(request, 'client/inscription.html')
+# Supprimer un voyage
+def delete_voyage(request, id):
+    db = get_connection()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM Voyage WHERE id_voyage = %s", (id,))
+    db.commit()
+    db.close()
+    return redirect('list_voyages')
+
+
 

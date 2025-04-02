@@ -8,4 +8,5 @@ def get_connection():
         user="root",
         password="",
         database="django_db"
+        
     )

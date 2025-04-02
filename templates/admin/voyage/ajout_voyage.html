@@ -1,0 +1,79 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <h4 class="page-title">Ajouter un voyage</h4>
+                <a href="{% url 'list_voyages' %}" class="btn btn-secondary btn-sm">
+                    <i class="mdi mdi-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-xl-8 offset-xl-2">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label">Bus</label>
+                                <select name="bus_id" class="form-control" required>
+                                    {% for bus in bus_list %}
+                                    <option value="{{ bus.0 }}">{{ bus.1 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Ville de départ</label>
+                                <input type="text" name="ville_depart" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Ville d’arrivée</label>
+                                <input type="text" name="ville_arrivee" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Date de départ</label>
+                                <input type="date" name="date_depart" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Heure de départ</label>
+                                <input type="time" name="heure_depart" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Prix du ticket</label>
+                                <input type="number" step="0.01" name="prix_ticket" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Places disponibles</label>
+                                <input type="number" name="places_disponibles" class="form-control" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Chauffeur</label>
+                                <input type="text" name="chauffeur" class="form-control">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Statut</label>
+                                <select name="statut" class="form-control">
+                                    <option value="prévu">Prévu</option>
+                                    <option value="en_cours">En cours</option>
+                                    <option value="terminé">Terminé</option>
+                                    <option value="annulé">Annulé</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary"><i class="mdi mdi-check"></i> Enregistrer</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

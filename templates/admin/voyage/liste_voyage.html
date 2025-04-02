@@ -1,0 +1,74 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+
+        <!-- Titre et bouton -->
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-flex justify-content-between align-items-center">
+                    <h4 class="page-title">Liste des voyages</h4>
+                    <a href="{% url 'add_voyage' %}" class="btn btn-blue btn-sm">
+                        <i class="mdi mdi-plus-circle-outline"></i> Ajouter un voyage
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="row">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h4 class="header-title mb-3">Voyages enregistrés</h4>
+                        <div class="table-responsive">
+                            <table class="table table-hover table-centered table-nowrap mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Bus</th>
+                                        <th>Départ</th>
+                                        <th>Arrivée</th>
+                                        <th>Date</th>
+                                        <th>Heure</th>
+                                        <th>Prix</th>
+                                        <th>Places</th>
+                                        <th>Chauffeur</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for v in voyages %}
+                                    <tr>
+                                        <td>{{ v.1 }}</td>
+                                        <td>{{ v.2 }}</td>
+                                        <td>{{ v.3 }}</td>
+                                        <td>{{ v.4 }}</td>
+                                        <td>{{ v.5 }}</td>
+                                        <td>{{ v.6 }} F</td>
+                                        <td>{{ v.7 }}</td>
+                                        <td>{{ v.8 }}</td>
+                                        <td>{{ v.9 }}</td>
+                                        <td>
+                                            <a href="{% url 'edit_voyage' v.0 %}" class="btn btn-xs btn-warning"><i class="mdi mdi-pencil"></i></a>
+                                            <a href="{% url 'delete_voyage' v.0 %}" class="btn btn-xs btn-danger"><i class="mdi mdi-delete"></i></a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="10" class="text-center">Aucun voyage enregistré.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
