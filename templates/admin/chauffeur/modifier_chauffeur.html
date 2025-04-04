@@ -1,0 +1,49 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <h4 class="page-title">Modifier le chauffeur</h4>
+                <a href="{% url 'list_chauffeurs' %}" class="btn btn-secondary btn-sm">
+                    <i class="mdi mdi-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-xl-8 offset-xl-2">
+                <div class="card">
+                    <div class="card-body">
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3"><label>Nom</label><input name="nom" class="form-control" value="{{ chauffeur.1 }}" required></div>
+                            <div class="mb-3"><label>Téléphone</label><input name="telephone" class="form-control" value="{{ chauffeur.2 }}" required></div>
+                            <div class="mb-3"><label>Email</label><input name="email" class="form-control" value="{{ chauffeur.3 }}"></div>
+                            <div class="mb-3"><label>Numéro de permis</label><input name="permis_numero" class="form-control" value="{{ chauffeur.4 }}" required></div>
+                            <div class="mb-3"><label>Date de naissance</label><input type="date" name="date_naissance" class="form-control" value="{{ chauffeur.5 }}"></div>
+                            <div class="mb-3"><label>Adresse</label><textarea name="adresse" class="form-control">{{ chauffeur.6 }}</textarea></div>
+                            <div class="mb-3"><label>Date d’embauche</label><input type="date" name="date_embauche" class="form-control" value="{{ chauffeur.7 }}"></div>
+                            <div class="mb-3">
+                                <label>Statut</label>
+                                <select name="statut" class="form-control">
+                                    {% for status in "actif,inactif,suspendu".split(",") %}
+                                    <option value="{{ status }}" {% if status == chauffeur.8 %}selected{% endif %}>{{ status|capfirst }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success"><i class="mdi mdi-check-bold"></i> Modifier</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

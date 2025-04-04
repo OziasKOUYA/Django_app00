@@ -164,3 +164,77 @@ def delete_voyage(request, id):
 
 
 
+# Lister les chauffeurs
+def list_chauffeurs(request):
+    db = get_connection()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM Chauffeur")
+    chauffeurs = cursor.fetchall()
+    db.close()
+    return render(request, 'admin/chauffeur/liste_chauffeur.html', {'chauffeurs': chauffeurs})
+
+# Ajouter un chauffeur
+def add_chauffeur(request):
+    if request.method == 'POST':
+        data = (
+            request.POST['nom'],
+            request.POST['telephone'],
+            request.POST.get('email', ''),
+            request.POST['permis_numero'],
+            request.POST['date_naissance'],
+            request.POST['adresse'],
+            request.POST['date_embauche'],
+            request.POST['statut']
+        )
+        db = get_connection()
+        cursor = db.cursor()
+        cursor.execute("""
+            INSERT INTO Chauffeur (nom, telephone, email, permis_numero, date_naissance, adresse, date_embauche, statut)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+        """, data)
+        db.commit()
+        db.close()
+        return redirect('list_chauffeurs')
+    return render(request, 'admin/chauffeur/ajout_chauffeur.html')
+
+# Modifier un chauffeur
+def edit_chauffeur(request, id):
+    db = get_connection()
+    cursor = db.cursor()
+    if request.method == 'POST':
+        data = (
+            request.POST['nom'],
+            request.POST['telephone'],
+            request.POST.get('email', ''),
+            request.POST['permis_numero'],
+            request.POST['date_naissance'],
+            request.POST['adresse'],
+            request.POST['date_embauche'],
+            request.POST['statut'],
+            id
+        )
+        cursor.execute("""
+            UPDATE Chauffeur SET
+                nom=%s, telephone=%s, email=%s, permis_numero=%s,
+                date_naissance=%s, adresse=%s, date_embauche=%s, statut=%s
+            WHERE id_chauffeur=%s
+        """, data)
+        db.commit()
+        db.close()
+        return redirect('list_chauffeurs')
+
+    cursor.execute("SELECT * FROM Chauffeur WHERE id_chauffeur = %s", (id,))
+    chauffeur = cursor.fetchone()
+    db.close()
+    return render(request, 'admin/chauffeur/modifier_chauffeur.html', {'chauffeur': chauffeur})
+
+# Supprimer un chauffeur
+def delete_chauffeur(request, id):
+    db = get_connection()
+    cursor = db.cursor()
+    cursor.execute("DELETE FROM Chauffeur WHERE id_chauffeur = %s", (id,))
+    db.commit()
+    db.close()
+    return redirect('liste_chauffeurs')
+
+

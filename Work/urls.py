@@ -17,4 +17,10 @@ urlpatterns = [
     path('voyages/add/', views.add_voyage, name='add_voyage'),
     path('voyages/edit/<int:id>/', views.edit_voyage, name='edit_voyage'),
     path('voyages/delete/<int:id>/', views.delete_voyage, name='delete_voyage'),
+
+    path('chauffeurs/', views.list_chauffeurs, name='list_chauffeurs'),
+    path('chauffeurs/add/', views.add_chauffeur, name='add_chauffeur'),
+    path('chauffeurs/edit/<int:id>/', views.edit_chauffeur, name='edit_chauffeur'),
+    path('chauffeurs/delete/<int:id>/', views.delete_chauffeur, name='delete_chauffeur'),
 ]
+

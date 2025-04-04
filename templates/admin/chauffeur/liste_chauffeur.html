@@ -1,0 +1,65 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <h4 class="page-title">Liste des chauffeurs</h4>
+                <a href="{% url 'add_chauffeur' %}" class="btn btn-blue btn-sm">
+                    <i class="mdi mdi-plus-circle-outline"></i> Ajouter un chauffeur
+                </a>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-xl-12">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-centered table-nowrap table-hover">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Nom</th>
+                                        <th>Téléphone</th>
+                                        <th>Email</th>
+                                        <th>Permis</th>
+                                        <th>Naissance</th>
+                                        <th>Date embauche</th>
+                                        <th>Statut</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for c in chauffeurs %}
+                                    <tr>
+                                        <td>{{ c.1 }}</td>
+                                        <td>{{ c.2 }}</td>
+                                        <td>{{ c.3 }}</td>
+                                        <td>{{ c.4 }}</td>
+                                        <td>{{ c.5 }}</td>
+                                        <td>{{ c.7 }}</td>
+                                        <td><span class="badge bg-soft-info text-info">{{ c.8 }}</span></td>
+                                        <td>
+                                            <a href="{% url 'edit_chauffeur' c.0 %}" class="btn btn-sm btn-warning"><i class="mdi mdi-pencil"></i></a>
+                                            <a href="{% url 'delete_chauffeur' c.0 %}" class="btn btn-sm btn-danger"><i class="mdi mdi-delete"></i></a>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="8" class="text-center">Aucun chauffeur enregistré.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
