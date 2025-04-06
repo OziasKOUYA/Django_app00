@@ -1,0 +1,123 @@
+<!-- ticket_pdf.html -->
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket de Voyage</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+            margin: auto;
+        }
+
+        .ticket-container {
+            width: 100%;
+            border: 2px solid #2C3E50;
+            border-radius: 10px;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .ticket-header {
+            background-color: #2C3E50;
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+            border-radius: 10px 10px 0 0;
+            margin-bottom: 20px;
+        }
+
+        .ticket-body {
+            font-size: 16px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .ticket-body .detail {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .ticket-body .value {
+            color: #7F8C8D;
+        }
+
+        .ticket-footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #2C3E50;
+            border-top: 1px solid #ccc;
+            padding-top: 10px;
+        }
+
+        .barcode {
+            margin-top: 20px;
+            width: 80%;
+            height: 30px;
+            background-color: #eee;
+            border-radius: 5px;
+            position: relative;
+        }
+
+        .barcode span {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 12px;
+            color: #7F8C8D;
+        }
+    </style>
+</head>
+<body>
+    <div class="ticket-container">
+        <div class="ticket-header">
+            <img src="logo.png" alt="Logo" width="50">
+            <span>Ticket de Voyage</span>
+        </div>
+
+        <div class="ticket-body">
+            <div class="detail">Numéro du Ticket:</div>
+            <div class="value">{{ ticket[0] }}</div>
+
+            <div class="detail">Nom du Voyageur:</div>
+            <div class="value">{{ ticket[1] }}</div>
+
+            <div class="detail">Ville de Départ:</div>
+            <div class="value">{{ ticket[2] }}</div>
+
+            <div class="detail">Ville d'Arrivée:</div>
+            <div class="value">{{ ticket[3] }}</div>
+
+            <div class="detail">Date de Départ:</div>
+            <div class="value">{{ ticket[4] }}</div>
+
+            <div class="detail">Heure de Départ:</div>
+            <div class="value">{{ ticket[5] }}</div>
+
+            <div class="detail">Numéro du Voyage:</div>
+            <div class="value">{{ ticket[6] }}</div>
+        </div>
+
+        <div class="barcode">
+            <span>Code-barres ou QR Code</span>
+        </div>
+
+        <div class="ticket-footer">
+            <div>Voyage effectué par [Nom de la Compagnie]</div>
+            <div>Adresse: 123 Rue Exemple, Paris</div>
+        </div>
+    </div>
+</body>
+</html>

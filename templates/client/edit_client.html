@@ -1,0 +1,47 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<div class="content">
+    <div class="container-fluid">
+
+        <!-- Titre -->
+        <div class="row">
+            <div class="col-12">
+                <div class="page-title-box d-flex justify-content-between align-items-center">
+                    <h4 class="page-title">Ajouter un admin</h4>
+                    <a href="{% url 'inscription_admin' %}" class="btn btn-secondary btn-sm">
+                        <i class="mdi mdi-arrow-left"></i> Retour
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulaire -->
+        <div class="row">
+            <div class="col-xl-8 offset-xl-2">
+                <div class="card">
+                    <div class="card-body">
+                        <h2>Modifier un client</h2>
+                        <form method="POST">
+                            {% csrf_token %}
+                            <label>Nom complet:</label><br>
+                            <input type="text" name="nom_complet" value="{{ client.1 }}"><br>
+                            <label>Email:</label><br>
+                            <input type="email" name="email_client" value="{{ client.2 }}"><br>
+                            <label>Mot de passe:</label><br>
+                            <input type="text" name="mot_de_passe" value="{{ client.3 }}"><br><br>
+                            <button type="submit">Modifier</button>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

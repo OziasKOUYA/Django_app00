@@ -1,0 +1,55 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <h4 class="page-title">Ajouter un voyage</h4>
+                <a href="#" class="btn btn-secondary btn-sm">
+                    <i class="mdi mdi-arrow-left"></i> Retour
+                </a>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-xl-8 offset-xl-2">
+                <div class="card">
+                    <div class="card-body">
+                        <h2>Génération de ticket</h2>
+                        <form method="post">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="numero_voyage">Numéro de voyage</label>
+                                <select name="numero_voyage" class="form-control" required>
+                                    <option value="">-- Choisir --</option>
+                                    {% for voyage in voyages %}
+                                    <option value="{{ voyage.0 }}">{{ voyage.0 }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="nom_voyageur">Nom du voyageur</label>
+                                <input type="text" name="nom_voyageur" class="form-control" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-success">Créer le ticket</button>
+                        </form>
+
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

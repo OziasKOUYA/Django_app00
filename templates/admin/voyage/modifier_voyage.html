@@ -21,52 +21,86 @@
                     <div class="card-body">
                         <form method="post">
                             {% csrf_token %}
+                        
+                            <!-- Bus -->
                             <div class="mb-3">
                                 <label class="form-label">Bus</label>
                                 <select name="bus_id" class="form-control" required>
                                     {% for bus in bus_list %}
-                                    <option value="{{ bus.0 }}" {% if bus.0 == voyage.1 %}selected{% endif %}>{{ bus.1 }}</option>
+                                        <option value="{{ bus.0 }}" {% if bus.0 == voyage.1 %}selected{% endif %}>
+                                            {{ bus.1 }}
+                                        </option>
                                     {% endfor %}
                                 </select>
                             </div>
+                        
+                            <!-- Ville de départ -->
                             <div class="mb-3">
                                 <label class="form-label">Ville de départ</label>
-                                <input type="text" name="ville_depart" value="{{ voyage.2 }}" class="form-control" required>
+                                <input type="text" name="ville_depart" value="{{ voyage.3 }}" class="form-control" required>
                             </div>
+                        
+                            <!-- Ville d’arrivée -->
                             <div class="mb-3">
                                 <label class="form-label">Ville d’arrivée</label>
-                                <input type="text" name="ville_arrivee" value="{{ voyage.3 }}" class="form-control" required>
+                                <input type="text" name="ville_arrivee" value="{{ voyage.4 }}" class="form-control" required>
                             </div>
+                        
+                            <!-- Date de départ -->
                             <div class="mb-3">
                                 <label class="form-label">Date de départ</label>
-                                <input type="date" name="date_depart" value="{{ voyage.4 }}" class="form-control" required>
+                                <input type="date" name="date_depart" value="{{ voyage.5|date:'Y-m-d' }}" class="form-control" required>
                             </div>
+                        
+                            <!-- Heure de départ -->
                             <div class="mb-3">
                                 <label class="form-label">Heure de départ</label>
-                                <input type="time" name="heure_depart" value="{{ voyage.5 }}" class="form-control" required>
+                                <input type="time" name="heure_depart" value="{{ voyage.6|time:'H:i' }}" class="form-control" required>
                             </div>
+                        
+                            <!-- Prix du ticket -->
                             <div class="mb-3">
                                 <label class="form-label">Prix du ticket</label>
-                                <input type="number" step="0.01" name="prix_ticket" value="{{ voyage.6 }}" class="form-control" required>
+                                <input type="number" name="prix_ticket" step="0.01" value="{{ voyage.7 }}" class="form-control" required>
                             </div>
+                        
+                            <!-- Places disponibles -->
                             <div class="mb-3">
                                 <label class="form-label">Places disponibles</label>
-                                <input type="number" name="places_disponibles" value="{{ voyage.7 }}" class="form-control" required>
+                                <input type="number" name="places_disponibles" value="{{ voyage.8 }}" class="form-control" required>
                             </div>
+                        
+                            <!-- Chauffeur -->
                             <div class="mb-3">
                                 <label class="form-label">Chauffeur</label>
-                                <input type="text" name="chauffeur" value="{{ voyage.8 }}" class="form-control">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Statut</label>
-                                <select name="statut" class="form-control">
-                                    {% for status in "prévu,en_cours,terminé,annulé".split(",") %}
-                                    <option value="{{ status }}" {% if status == voyage.9 %}selected{% endif %}>{{ status|capfirst }}</option>
+                                <select name="chauffeur_id" class="form-control" required>
+                                    {% for chauffeur in chauffeur_list %}
+                                        <option value="{{ chauffeur.0 }}" {% if chauffeur.0 == voyage.9 %}selected{% endif %}>
+                                            {{ chauffeur.1 }}
+                                        </option>
                                     {% endfor %}
                                 </select>
                             </div>
-                            <button type="submit" class="btn btn-success"><i class="mdi mdi-check-bold"></i> Modifier</button>
+                        
+                            <!-- Statut -->
+                            <div class="mb-3">
+                                <label class="form-label">Statut</label>
+                                <select name="statut" class="form-control" required>
+                                    {% for statut in statut_list %}
+                                        <option value="{{ statut }}" {% if statut == voyage.9 %}selected{% endif %}>
+                                            {{ statut|capfirst }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        
+                            <!-- Submit -->
+                            <button type="submit" class="btn btn-success">
+                                <i class="mdi mdi-check-bold"></i> Modifier
+                            </button>
                         </form>
+                        
+                        
                     </div>
                 </div>
             </div>

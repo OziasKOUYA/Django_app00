@@ -1,0 +1,70 @@
+{% extends 'admin/base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-12 d-flex justify-content-between align-items-center">
+                <h4 class="page-title">liste des tikets</h4>
+                <a href="{% url 'add_ticket' %}" class="btn btn-secondary btn-sm">
+                    <i class="mdi mdi-arrow-left"></i> Ajout
+                </a>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col-xl-8 offset-xl-2">
+                <div class="card">
+                    <div class="card-body">
+                        <h2>Liste des tickets</h2>
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Numéro Ticket</th>
+                                    <th>Voyageur</th>
+                                    <th>Numéro Voyage</th>
+                                    <th>Départ</th>
+                                    <th>Arrivée</th>
+                                    <th>Date</th>
+                                    <th>detail</th>
+                                    <th>supprimer</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for ticket in tickets %}
+                                <tr>
+                                    <td>{{ ticket.0 }}</td>
+                                    <td>{{ ticket.1 }}</td>
+                                    <td>{{ ticket.2 }}</td>
+                                    <td>{{ ticket.3 }}</td>
+                                    <td>{{ ticket.4 }}</td>
+                                    <td>{{ ticket.5 }}</td>
+                                    <td>
+                                        <a href="{% url 'ticket_detail' ticket.0 %}" class="btn btn-info">Voir Détails</a>
+                                    </td>
+                                    <td>
+                                        <!-- Lien pour supprimer le ticket -->
+                                        <a href="{% url 'delete_ticket' ticket.0 %}" class="btn btn-danger" onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce ticket ?')">Supprimer</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+
+
+
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

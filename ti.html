@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket de Voyage</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .ticket {
+            width: 100%;
+            max-width: 400px;
+            background: linear-gradient(135deg, #ffffff 0%, #f1f8ff 100%);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+            position: relative;
+        }
+        
+        .ticket-header {
+            background: linear-gradient(to right, #2c3e50, #3498db);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .ticket-header h1 {
+            margin: 0;
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .ticket-header p {
+            margin: 5px 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .ticket-body {
+            padding: 25px;
+        }
+        
+        .ticket-info {
+            margin-bottom: 20px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed #e0e0e0;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #555;
+            flex: 1;
+        }
+        
+        .info-value {
+            flex: 2;
+            text-align: right;
+            color: #333;
+            font-weight: 500;
+        }
+        
+        .highlight {
+            color: #e74c3c;
+            font-weight: 700;
+        }
+        
+        .route {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 25px 0;
+            position: relative;
+        }
+        
+        .city {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .city-name {
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .city-label {
+            font-size: 12px;
+            color: #777;
+        }
+        
+        .arrow {
+            font-size: 24px;
+            color: #3498db;
+            margin: 0 10px;
+        }
+        
+        .ticket-footer {
+            background-color: #f9f9f9;
+            padding: 15px 25px;
+            border-top: 1px solid #eee;
+            font-size: 12px;
+            color: #666;
+        }
+        
+        .barcode {
+            text-align: center;
+            margin-top: 20px;
+            font-family: 'Libre Barcode 128', cursive;
+            font-size: 36px;
+            letter-spacing: 2px;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+            position: relative;
+            padding-left: 20px;
+        }
+        
+        .instructions li:before {
+            content: "✓";
+            color: #27ae60;
+            position: absolute;
+            left: 0;
+        }
+        
+        .logo {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            width: 50px;
+            height: 50px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #3498db;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="ticket">
+        <div class="ticket-header">
+            <div class="logo">GB</div>
+            <h1>TICKET DE VOYAGE</h1>
+            <p>N°: <span class="highlight">TR2023-45876</span></p>
+        </div>
+        
+        <div class="ticket-body">
+            <div class="ticket-info">
+                <div class="info-row">
+                    <span class="info-label">Nom du Voyageur:</span>
+                    <span class="info-value">Koffi AMETEPE</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">N° du Voyage:</span>
+                    <span class="info-value">VG-78945</span>
+                </div>
+            </div>
+            
+            <div class="route">
+                <div class="city">
+                    <div class="city-label">Départ</div>
+                    <div class="city-name">Accra</div>
+                </div>
+                <div class="arrow">➔</div>
+                <div class="city">
+                    <div class="city-label">Arrivée</div>
+                    <div class="city-name">Lomé</div>
+                </div>
+            </div>
+            
+            <div class="ticket-info">
+                <div class="info-row">
+                    <span class="info-label">Date de Départ:</span>
+                    <span class="info-value">15 Nov 2023</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Heure de Départ:</span>
+                    <span class="info-value">07:30</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Siège:</span>
+                    <span class="info-value">B12</span>
+                </div>
+            </div>
+            
+            <div class="barcode">TR2023-45876</div>
+            
+            <div class="instructions">
+                <h3>Instructions:</h3>
+                <ul>
+                    <li>Présentez ce ticket à l'embarquement</li>
+                    <li>Enregistrement 30 min avant le départ</li>
+                    <li>Conservez-le jusqu'à destination</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="ticket-footer">
+            <div style="text-align: center;">Merci de voyager avec <strong>Gare Routière Benin</strong></div>
+            <div style="text-align: center; margin-top: 5px; font-size: 11px;">Contact: +228 90 12 34 56 • www.gareroutierebj.com</div>
+        </div>
+    </div>
+</body>
+</html>

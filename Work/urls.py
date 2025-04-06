@@ -2,11 +2,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-  
-   
-    
-    path('test/', views.test, name='test' ),
-    path('test2/', views.test2, name='test2' ),
 
     path('list_bus/', views.list_bus, name='list_bus'),
     path('add_bus/', views.add_bus, name='add_bus'),
@@ -22,5 +17,29 @@ urlpatterns = [
     path('chauffeurs/add/', views.add_chauffeur, name='add_chauffeur'),
     path('chauffeurs/edit/<int:id>/', views.edit_chauffeur, name='edit_chauffeur'),
     path('chauffeurs/delete/<int:id>/', views.delete_chauffeur, name='delete_chauffeur'),
+
+    path('add_ticket/', views.add_ticket, name='add_ticket'),
+    path('tickets/', views.tickets_list, name='tickets_list'),
+
+    path('ticket/<int:ticket_id>/', views.ticket_detail, name='ticket_detail'),
+    path('ticket/delete/<int:ticket_id>/', views.delete_ticket, name='delete_ticket'),
+
+    path('clients/', views.list_clients, name='list_clients'),
+    path('clients/ajouter/', views.add_client, name='add_client'),
+    path('clients/modifier/<int:client_id>/', views.edit_client, name='edit_client'),
+    path('clients/supprimer/<int:client_id>/', views.delete_client, name='delete_client'),
+
+    path('admin/ajouter/', views.add_admin, name='add_admin'),
+    
+
+
+
+    path('login/', views.login_view, name='login'),
+    # path('logout/', views.logout_view, name='logout'),
+    path('admin/dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('client/dashboard/', views.client_dashboard, name='client_dashboard'),
+
+
+    
 ]
 
