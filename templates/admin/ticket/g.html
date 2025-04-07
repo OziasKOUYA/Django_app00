@@ -1,0 +1,89 @@
+{% extends 'admin/base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">
+                            <i class="fas fa-ticket-alt mr-2"></i>Génération des tickets
+                        </h3>
+                        <small>{% now "d/m/Y H:i" %}</small>
+                    </div>
+                </div>
+                <div class="card-body">
+                    
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>N° Résa</th>
+                                    <th>Voyageur</th>
+                                    <th>N° Voyage</th>
+                                    <th>Bus</th>
+                                    <th>Destination</th>
+                                    <th>Date/Heure</th>
+                                    <th>Places</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for res in reservations %}
+                                <tr>
+                                    <td>{{ res.0 }}</td>
+                                    <td>{{ res.1 }}</td>
+                                    <td>{{ res.2 }}</td>
+                                    <td>{{ res.7 }}</td>
+                                    <td>{{ res.4 }}</td>
+                                    <td>
+                                        {{ res.3|date:"d/m/Y" }}<br>
+                                        <small>{{ res.5|time:"H:i" }}</small>
+                                    </td>
+                                    <td class="text-center {% if res.6 <= 0 %}text-danger{% endif %}">
+                                        {{ res.6 }}
+                                    </td>
+                                    <td class="text-center">
+                                        <form method="post" class="d-inline">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="id_reservation" value="{{ res.0 }}">
+                                            <button type="submit" class="btn btn-sm btn-success" 
+                                                {% if res.6 <= 0 %}disabled title="Plus de places disponibles"{% endif %}>
+                                                <i class="fas fa-ticket-alt"></i> Générer
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="8" class="text-center text-muted py-4">
+                                        <i class="fas fa-info-circle mr-2"></i>Aucune réservation en attente
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+// Script pour confirmer avant génération
+document.addEventListener('DOMContentLoaded', function() {
+    const forms = document.querySelectorAll('form[method="post"]');
+    forms.forEach(form => {
+        form.addEventListener('submit', function(e) {
+            if (!confirm('Confirmer la génération du ticket ?')) {
+                e.preventDefault();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,8 +1,12 @@
+from datetime import datetime
+from venv import logger
 from django.db import connection
 from django.http import Http404, HttpResponse, JsonResponse
 from .db import get_connection
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.db import connection
+import hashlib
 
 
 
@@ -37,6 +41,8 @@ def generer_numero_ticket():
 
 
 def list_clients(request):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     db = get_connection()
     cursor = db.cursor()
     cursor.execute("SELECT * FROM client")
@@ -46,27 +52,31 @@ def list_clients(request):
 
 
 def add_client(request):
+
     if request.method == 'POST':
         nom_complet = request.POST['nom_complet']
         email = request.POST['email_client']
         mot_de_passe = request.POST['mot_de_passe']
+        hashed_password = hashlib.md5(mot_de_passe.encode()).hexdigest()
 
         db = get_connection()
         cursor = db.cursor()
         cursor.execute("""
             INSERT INTO client (nom_complet, email_client, mot_de_passe)
             VALUES (%s, %s, %s)
-        """, (nom_complet, email, mot_de_passe))
+        """, (nom_complet, email, hashed_password))
         db.commit()
         db.close()
 
         messages.success(request, "Client ajouté avec succès.")
-        return redirect('login_view')
+        return redirect('login')
 
     return render(request, 'client/add_client.html')
 
 
 def edit_client(request, client_id):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     db = get_connection()
     cursor = db.cursor()
     if request.method == 'POST':
@@ -91,6 +101,8 @@ def edit_client(request, client_id):
 
 
 def delete_client(request, client_id):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     db = get_connection()
     cursor = db.cursor()
     cursor.execute("DELETE FROM client WHERE id_client = %s", [client_id])
@@ -103,75 +115,110 @@ def delete_client(request, client_id):
 
 ### ---------------- ADMIN ----------------
 
+
+
+
+
+# 🔐 Hash password (optionnel)
+def hash_password(password):
+    return hashlib.md5(password.encode()).hexdigest()
+
+# 📋 Liste des admins
+def list_admins(request):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
+    cursor = connection.cursor()
+    cursor.execute("SELECT * FROM admin")
+    admins = cursor.fetchall()
+    return render(request, 'admin/ajouter_admin/liste_admin.html', {'admins': admins})
+
+# ➕ Ajouter admin
 def add_admin(request):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     if request.method == 'POST':
         nom_complet = request.POST['nom_complet']
-        email = request.POST['email_admin']
+        email_admin = request.POST['email_admin']
         mot_de_passe = request.POST['mot_de_passe']
+        hashed_password = hashlib.md5(mot_de_passe.encode()).hexdigest()
 
-        db = get_connection()
-        cursor = db.cursor()
-        cursor.execute("""
-            INSERT INTO admin (nom_complet, email_admin, mot_de_passe)
-            VALUES (%s, %s, %s)
-        """, (nom_complet, email, mot_de_passe))
-        db.commit()
-        db.close()
+        cursor = connection.cursor()
+        try:
+            cursor.execute("INSERT INTO admin (nom_complet, email_admin, mot_de_passe) VALUES (%s, %s, %s)", 
+                           (nom_complet, email_admin, hashed_password))
+            messages.success(request, "Admin ajouté avec succès.")
+        except:
+            messages.error(request, "Erreur : email déjà utilisé.")
+        return redirect('list_admins')
+    
+    return render(request, 'admin/ajouter_admin/ajout_admin.html')
 
-        messages.success(request, "Admin ajouté avec succès.")
-        return redirect('add_admin')
-
-    return render(request, 'admin/add_admin.html')
-
-
-
-
-def login_view(request):
-    if request.method == 'POST':
-        email = request.POST['email']
-        mot_de_passe = request.POST['mot_de_passe']
-
-        db = get_connection()
-        cursor = db.cursor()
-
-        # Vérifie d'abord dans les admins
-        cursor.execute("SELECT id_admin, nom_complet FROM admin WHERE email_admin = %s AND mot_de_passe = %s", (email, mot_de_passe))
-        admin = cursor.fetchone()
-
-        if admin:
-            request.session['user_id'] = admin[0]
-            request.session['user_name'] = admin[1]
-            request.session['role'] = 'admin'
-            db.close()
-            return redirect('admin_dashboard')
-
-        # Sinon vérifie dans les clients
-        cursor.execute("SELECT id_client, nom_complet FROM client WHERE email_client = %s AND mot_de_passe = %s", (email, mot_de_passe))
-        client = cursor.fetchone()
-
-        if client:
-            request.session['user_id'] = client[0]
-            request.session['user_name'] = client[1]
-            request.session['role'] = 'client'
-            db.close()
-            return redirect('client_dashboard')
-
-        db.close()
-        messages.error(request, "Email ou mot de passe incorrect.")
-
-    return render(request, 'login.html')
+# ❌ Supprimer admin
+def delete_admin(request, id_admin):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM admin WHERE id_admin = %s", [id_admin])
+    messages.success(request, "Admin supprimé.")
+    return redirect('list_admins')
 
 
+def login(request):
+    if request.method == "POST":
+        email = request.POST.get("email")
+        password = request.POST.get("password")
+        hashed_password = hashlib.md5(password.encode()).hexdigest()
 
-def admin_dashboard(request):
-    if request.session.get('role') != 'admin':
+        with connection.cursor() as cursor:
+            # Check Client
+
+            cursor.execute("SELECT * FROM admin WHERE email_admin=%s AND mot_de_passe=%s", [email, hashed_password])
+            admin = cursor.fetchone()
+            if admin:
+                request.session['user_id'] = admin[0]
+                request.session['user_name'] = admin[1]
+                request.session['user_email'] = admin[2]
+                request.session['user_role'] = 'admin'
+                return redirect('admin_dashboard')
+
+            cursor.execute("SELECT * FROM client WHERE email_client=%s AND mot_de_passe=%s", [email, hashed_password])
+            client = cursor.fetchone()
+            if client:
+                request.session["id_client"] = client[0]  # id_client
+                request.session["email_client"] = client[2]
+                request.session["nom_complet_client"] = client[1]
+                request.session["user_role"] = "client"
+                return redirect('client_dashboard')
+
+            # Check Admin
+            
+            messages.error(request, "Email ou mot de passe incorrect.")
+            return redirect('login')
+
+    return render(request, "login.html")
+
+
+
+# ===============================
+# 🔓 LOGOUT (général)
+# ===============================
+def logout(request):
+    request.session.flush()
+    messages.success(request, "Déconnexion réussie.")
+    return redirect('login')
+
+
+
+def admin_dashbo(request):
+    if request.session.get('user_role') != 'admin':
         return redirect('login')
     return render(request, 'admin/index.html')
 
 
 def client_dashboard(request):
-    if request.session.get('role') != 'client':
+    if request.session.get('user_role') != 'client':
         return redirect('login')
+
     return render(request, 'client/index.html')
 
 
@@ -185,7 +232,7 @@ def client_dashboard(request):
 
 # Afficher tous les bus
 def list_bus(request):
-    if request.session.get('role') != 'admin':
+    if request.session.get('user_role') != 'admin':
         return redirect('login')
     db = get_connection()
     cursor = db.cursor()
@@ -196,6 +243,8 @@ def list_bus(request):
 
 # Ajouter un bus
 def add_bus(request):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     if request.method == 'POST':
         nom = request.POST['nom']
         plaque = request.POST['plaque']
@@ -212,6 +261,8 @@ def add_bus(request):
 
 # Modifier un bus
 def edit_bus(request, id):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     db = get_connection()
     cursor = db.cursor()
     if request.method == 'POST':
@@ -230,6 +281,8 @@ def edit_bus(request, id):
 
 # Supprimer un bus
 def delete_bus(request, id):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     db = get_connection()
     cursor = db.cursor()
     cursor.execute("DELETE FROM Bus WHERE id_bus = %s", (id,))
@@ -238,10 +291,10 @@ def delete_bus(request, id):
     return redirect('list_bus')
 
 
-
-
 # Liste des voyages
 def list_voyages(request):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     db = get_connection()
     cursor = db.cursor()
     cursor.execute("""
@@ -259,6 +312,8 @@ def list_voyages(request):
 
 # Ajouter un voyage
 def add_voyage(request):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     db = get_connection()
     cursor = db.cursor()
 
@@ -303,6 +358,8 @@ def add_voyage(request):
 
 # Modifier un voyage
 def edit_voyage(request, id):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     db = get_connection()
     cursor = db.cursor()
 
@@ -352,6 +409,8 @@ def edit_voyage(request, id):
 
 # Supprimer un voyage
 def delete_voyage(request, id):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     db = get_connection()
     cursor = db.cursor()
     cursor.execute("DELETE FROM Voyage WHERE id_voyage = %s", (id,))
@@ -360,9 +419,10 @@ def delete_voyage(request, id):
     return redirect('list_voyages')
 
 
-
 # Lister les chauffeurs
 def list_chauffeurs(request):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     db = get_connection()
     cursor = db.cursor()
     cursor.execute("SELECT * FROM Chauffeur")
@@ -372,6 +432,8 @@ def list_chauffeurs(request):
 
 # Ajouter un chauffeur
 def add_chauffeur(request):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     if request.method == 'POST':
         data = (
             request.POST['nom'],
@@ -396,6 +458,8 @@ def add_chauffeur(request):
 
 # Modifier un chauffeur
 def edit_chauffeur(request, id):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     db = get_connection()
     cursor = db.cursor()
     statuts = ['actif', 'inactif', 'suspendu']
@@ -430,6 +494,8 @@ def edit_chauffeur(request, id):
 
 # Supprimer un chauffeur
 def delete_chauffeur(request, id):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     db = get_connection()
     cursor = db.cursor()
     cursor.execute("DELETE FROM Chauffeur WHERE id_chauffeur = %s", (id,))
@@ -438,9 +504,9 @@ def delete_chauffeur(request, id):
     return redirect('liste_chauffeurs')
 
 
-
-
 def get_voyage_info(request):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     numero_voyage = request.GET.get('numero_voyage')
     db = get_connection()
     cursor = db.cursor()
@@ -462,9 +528,9 @@ def get_voyage_info(request):
         return JsonResponse({'error': 'Voyage non trouvé'}, status=404)
 
 
-
-
 def add_ticket(request):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     db = get_connection()
     cursor = db.cursor()
 
@@ -508,7 +574,94 @@ def add_ticket(request):
 
 
 
+
+def add_ticket_(request):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
+    
+    db = get_connection()
+    cursor = db.cursor()
+
+    if request.method == 'POST' and 'id_reservation' in request.POST:
+        id_reservation = request.POST['id_reservation']
+        
+        try:
+            # Récupérer les infos complètes de la réservation
+            cursor.execute("""
+                SELECT r.id_reservation, r.nom_complet_client, v.numero_voyage, r.id_client
+                FROM reservation r
+                JOIN voyage v ON r.id_voyage = v.id_voyage
+                WHERE r.id_reservation = %s AND r.statut = 'en attente'
+            """, [id_reservation])
+            reservation = cursor.fetchone()
+
+            if not reservation:
+                messages.error(request, "Réservation introuvable ou déjà confirmée.")
+            else:
+                # Générer un numéro de ticket unique
+                numero_ticket = f"TKT-{reservation[0]}-{datetime.now().strftime('%Y%m%d%H%M%S')}"
+                
+                # Enregistrer le ticket
+                cursor.execute("""
+                    INSERT INTO ticket (
+                        numero_du_ticket, 
+                        numero_voyage, 
+                        nom_voyageur
+                    ) VALUES (%s, %s, %s)
+                """, (
+                    numero_ticket,
+                    reservation[2],  # numero_voyage
+                    reservation[1]   # nom_complet_client
+                ))
+
+                # Mettre à jour le statut de la réservation
+                cursor.execute("""
+                    UPDATE reservation 
+                    SET statut = 'confirmé'
+                    WHERE id_reservation = %s
+                """, [id_reservation])
+
+                # Décrémenter le nombre de places disponibles
+                cursor.execute("""
+                    UPDATE voyage 
+                    SET places_disponibles = places_disponibles - 1
+                    WHERE numero_voyage = %s
+                """, [reservation[2]])
+
+                db.commit()
+                messages.success(request, f"Ticket {numero_ticket} généré avec succès pour {reservation[1]}")
+                return redirect('tickets_list')
+
+        except Exception as e:
+            db.rollback()
+            messages.error(request, f"Erreur lors de la génération du ticket: {str(e)}")
+            logger.error(f"Erreur génération ticket: {str(e)}")
+
+    # Récupérer les réservations en attente avec les infos voyage
+    cursor.execute("""
+        SELECT r.id_reservation, r.nom_complet_client, v.numero_voyage, 
+               v.date_depart, v.ville_arrivee, v.heure_depart,
+               v.places_disponibles, b.nom_du_bus
+        FROM reservation r
+        JOIN voyage v ON r.id_voyage = v.id_voyage
+        JOIN bus b ON v.bus_id = b.id_bus
+        WHERE r.statut = 'en attente'
+        ORDER BY v.date_depart, v.heure_depart
+    """)
+    reservations = cursor.fetchall()
+    db.close()
+
+    return render(request, 'admin/ticket/g.html', {
+        'reservations': reservations,
+        'now': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    })
+
+
+
+
 def tickets_list(request):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     db = get_connection()
     cursor = db.cursor()
 
@@ -529,6 +682,8 @@ def tickets_list(request):
 
 
 def delete_ticket(request, ticket_id):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     db = get_connection()
     cursor = db.cursor()
 
@@ -568,6 +723,8 @@ def delete_ticket(request, ticket_id):
 
 # views.py
 def ticket_detail(request, ticket_id):
+    if request.session.get('user_role') != 'admin':
+        return redirect('login')
     db = get_connection()
     cursor = db.cursor()
 
@@ -587,3 +744,121 @@ def ticket_detail(request, ticket_id):
 
     # Passer les informations du ticket au template
     return render(request, 'admin/ticket/detail_ticket.html', {'ticket': ticket})
+
+
+
+
+
+
+def list_voyages_client(request):
+    if request.session.get('user_role') != 'client':
+        return redirect('login')
+    db = get_connection()
+    cursor = db.cursor()
+    cursor.execute("""
+        SELECT v.id_voyage, b.nom_du_bus, v.ville_depart, v.ville_arrivee, v.date_depart,
+               v.heure_depart, v.prix_ticket, v.places_disponibles,
+               c.nom AS chauffeur_nom, v.statut, v.numero_voyage 
+        FROM voyage v
+        JOIN bus b ON v.bus_id = b.id_bus
+        JOIN chauffeur c ON v.chauffeur_id = c.id_chauffeur
+    """)
+    voyages = cursor.fetchall()
+    db.close()
+    return render(request, 'client/liste_voyage.html', {'voyages': voyages})
+
+
+def reserver_voyage(request, id_voyage):
+    if request.session.get('user_role') != 'client':
+        return redirect('login')
+
+    id_client = request.session.get('id_client')
+    nom_complet_client = request.session.get('nom_complet_client')
+    email_client = request.session.get('email_client')
+
+    # Sécurité : vérifier que les infos sont bien présentes
+    if not id_client or not nom_complet_client or not email_client:
+        messages.error(request, "Session expirée. Veuillez vous reconnecter.")
+        return redirect('login')
+
+    if request.method == 'POST':
+        with connection.cursor() as cursor:
+            cursor.execute("""
+                INSERT INTO reservation (id_client, id_voyage, nom_complet_client, email_client)
+                VALUES (%s, %s, %s, %s)
+            """, [id_client, id_voyage, nom_complet_client, email_client])
+
+        messages.success(request, "Réservation effectuée avec succès !")
+        return redirect('list_voyages_client')
+
+
+def client_tickets(request):
+    # Vérification du rôle client
+    if request.session.get('user_role') != 'client':
+        return redirect('login')
+    
+    # Vérification de l'ID client en session
+    client_id = request.session.get('user_id')
+    if not client_id:
+        return redirect('login')
+
+    with connection.cursor() as cursor:
+        try:
+            # Requête modifiée pour filtrer les réservations confirmées
+            cursor.execute("""
+                SELECT t.numero_du_ticket, v.numero_voyage, t.nom_voyageur, 
+                       t.date_creation, v.ville_depart, v.ville_arrivee,
+                       v.date_depart, v.heure_depart, r.statut
+                FROM ticket t
+                JOIN reservation r ON t.nom_voyageur = r.nom_complet_client
+                JOIN voyage v ON r.id_voyage = v.id_voyage
+                WHERE r.id_client = %s AND r.statut = 'confirmé'
+                ORDER BY t.date_creation DESC
+            """, [client_id])
+            
+            tickets = cursor.fetchall()
+            
+        except Exception as e:
+            tickets = []
+            print(f"Erreur: {e}")
+
+    return render(request, 'client/mes_tickets.html', {
+        'tickets': tickets,
+        'has_tickets': bool(tickets)
+    })
+
+
+
+
+def detail_ticket(request, numero_ticket):
+    if request.session.get('user_role') != 'client':
+        return redirect('login')
+
+    client_id = request.session.get('user_id')
+    if not client_id:
+        return redirect('login')
+
+    with connection.cursor() as cursor:
+        cursor.execute("""
+            SELECT t.numero_du_ticket, v.numero_voyage, t.nom_voyageur, 
+                   t.date_creation, v.ville_depart, v.ville_arrivee,
+                   v.date_depart, v.heure_depart, r.statut
+            FROM ticket t
+            JOIN reservation r ON t.nom_voyageur = r.nom_complet_client
+            JOIN voyage v ON r.id_voyage = v.id_voyage
+            WHERE t.numero_du_ticket = %s AND r.id_client = %s
+        """, [numero_ticket, client_id])
+
+        ticket = cursor.fetchone()
+
+    if not ticket:
+        messages.error(request, "Ticket introuvable ou accès refusé.")
+        return redirect('client_tickets')
+
+    return render(request, 'client/t.html', {'ticket': ticket})
+
+
+
+
+
+

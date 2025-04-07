@@ -1,0 +1,40 @@
+{% extends 'client/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4"><i class="fas fa-ticket-alt"></i> Mes Tickets</h2>
+    
+    {% if tickets %}
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="thead-light">
+                <tr>
+                    <th>N° Ticket</th>
+                    <th>Trajet</th>
+                    <th>Date</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ticket in tickets %}
+                <tr>
+                    <td>{{ ticket.0 }}</td>  <!-- numero_du_ticket -->
+                    <td>{{ ticket.4 }} → {{ ticket.5 }}</td>  <!-- ville_depart → ville_arrivee -->
+                    <td>{{ ticket.6|date:"d/m/Y" }}</td>  <!-- date_depart -->
+                    <td>
+                        <!-- Lien vers la page de détail -->
+                        <a href="{% url 'detail_ticket' ticket.0 %}" class="btn btn-outline-primary mt-2">Voir les détails</a>
+
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> Vous n'avez aucun ticket.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

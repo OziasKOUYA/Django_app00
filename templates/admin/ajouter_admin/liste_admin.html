@@ -12,9 +12,7 @@
             <div class="col-12">
                 <div class="page-title-box d-flex justify-content-between align-items-center">
                     <h4 class="page-title">Liste des admin</h4>
-                    <a href="{% url 'inscription_admin' %}" class="btn btn-blue btn-sm">
-                        <i class="mdi mdi-plus-circle-outline"></i> Ajouter un admin
-                    </a>
+
                 </div>
             </div>
         </div>
@@ -30,16 +28,21 @@
                                 <thead class="table-light">
                                     <tr>
                                         <th>ID</th>
-                                        <th>Non</th>
-                                        <th>Plaque</th>
+                                        <th>Nom</th>
+                                        <th>Email</th>
+                                        <th>Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for admin in admins %}
                                     <tr>
-                                        <td>{{ admin.id_admin }}</td>
-                                        <td>{{ admin.nom_complet }}</td>
-                                        <td>{{ admin.email_admin }}</td>
+                                        <td>{{ admin.0 }}</td>
+                                        <td>{{ admin.1 }}</td>
+                                        <td>{{ admin.2 }}</td>
+                                        <td>
+                                            <a href="{% url 'delete_admin' admin.0 %}"
+                                                onclick="return confirm('Supprimer ?')">🗑 Supprimer</a>
+                                        </td>
                                     </tr>
                                     {% empty %}
                                     <tr>

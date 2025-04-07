@@ -15,15 +15,12 @@
 
         <ul class="topbar-menu d-flex align-items-center ms-auto me-3">
             {% if request.session.user_name %}
-            <li class="nav-item me-3">
-                <span class="text-black">
-                    👤 Bonjour, <strong>{{ request.session.user_name }}</strong>
-                </span>
-            </li>
-            <li class="nav-item">
-                <a href="{% url 'logout' %}" class="btn btn-danger btn-sm">Déconnexion</a>
-            </li>
+            <div class="topbar-user">
+                Bonjour <strong>{{ request.session.user_name }}</strong> |
+                <a href="{% url 'logout' %}">Déconnexion</a>
+            </div>
             {% endif %}
+
         </ul>
     </div>
 </div>
