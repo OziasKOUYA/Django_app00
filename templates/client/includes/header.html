@@ -14,12 +14,12 @@
         </div>
 
         <ul class="topbar-menu d-flex align-items-center ms-auto me-3">
-            {% if request.session.user_name %}
+            
             <div class="topbar-user">
-                Bonjour <strong>{{ request.session.user_name }}</strong> |
+                <p>Bienvenue, {{ request.session.nom_complet_client }}</p> |
                 <a href="{% url 'logout' %}">Déconnexion</a>
             </div>
-            {% endif %}
+           
 
         </ul>
     </div>

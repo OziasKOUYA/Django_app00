@@ -209,18 +209,83 @@ def logout(request):
 
 
 
+
 def admin_dashbo(request):
     if request.session.get('user_role') != 'admin':
         return redirect('login')
-    return render(request, 'admin/index.html')
 
+    total_tickets = 0
+    total_voyages = 0
+    total_bus = 0
+    total_reservations = 0
 
+    try:
+        with connection.cursor() as cursor:
+            # 🔹 1. Nombre total de tickets
+            cursor.execute("SELECT COUNT(*) FROM ticket")
+            total_tickets = cursor.fetchone()[0]
+            print("🎫 Nombre de tickets =", total_tickets)
+
+            # 🔹 2. Nombre total de voyages
+            cursor.execute("SELECT COUNT(*) FROM voyage")
+            total_voyages = cursor.fetchone()[0]
+            print("🚌 Nombre de voyages =", total_voyages)
+
+            # 🔹 3. Nombre total de bus
+            cursor.execute("SELECT COUNT(*) FROM bus")
+            total_bus = cursor.fetchone()[0]
+            print("🚍 Nombre de bus =", total_bus)
+
+            # 🔹 4. Nombre total de réservations
+            cursor.execute("SELECT COUNT(*) FROM reservation")
+            total_reservations = cursor.fetchone()[0]
+            print("📦 Nombre de réservations =", total_reservations)
+
+    except Exception as e:
+        print("❌ Erreur SQL:", e)
+
+    return render(request, 'admin/index.html', {
+        'total_tickets': total_tickets,
+        'total_voyages': total_voyages,
+        'total_bus': total_bus,
+        'total_reservations': total_reservations,
+    })
 def client_dashboard(request):
-    if request.session.get('user_role') != 'client':
+    if request.session.get('user_role') != 'client' or not request.session.get('id_client'):
         return redirect('login')
 
-    return render(request, 'client/index.html')
+    client_id = request.session.get('id_client')
 
+    print("📌 dashboard_client appelée avec client_id =", client_id)
+
+    total_voyages = 0
+    total_reservations = 0
+    total_reservations_confirmees = 0
+
+    try:
+        with connection.cursor() as cursor:
+            # 🔹 1. Nombre total de voyages
+            cursor.execute("SELECT COUNT(*) FROM voyage")
+            total_voyages = cursor.fetchone()[0]
+            print("✅ Total voyages =", total_voyages)
+
+            # 🔹 2. Nombre de réservations pour ce client
+            cursor.execute("SELECT COUNT(*) FROM reservation WHERE id_client = %s", [client_id])
+            total_reservations = cursor.fetchone()[0]
+            print("✅ Total réservations client =", total_reservations)
+
+            # 🔹 3. Nombre de réservations confirmées
+            cursor.execute("SELECT COUNT(*) FROM reservation WHERE id_client = %s AND statut = 'confirmé'", [client_id])
+            total_reservations_confirmees = cursor.fetchone()[0]
+            print("✅ Réservations confirmées =", total_reservations_confirmees)
+
+    except Exception as e:
+        print("❌ Erreur dans dashboard_client :", e)
+    return render(request, 'client/index.html',{
+        'total_voyages': total_voyages,
+        'total_reservations': total_reservations,
+        'confirmed_reservations': total_reservations_confirmees
+    })
 
 
 
@@ -793,12 +858,12 @@ def reserver_voyage(request, id_voyage):
 
 
 def client_tickets(request):
-    # Vérification du rôle client
-    if request.session.get('user_role') != 'client':
+    # Vérification si l'utilisateur est connecté en tant que client
+    if request.session.get('user_role') != 'client' or not request.session.get('id_client'):
         return redirect('login')
-    
-    # Vérification de l'ID client en session
-    client_id = request.session.get('user_id')
+
+    client_id = request.session.get('id_client')
+
     if not client_id:
         return redirect('login')
 
@@ -806,15 +871,16 @@ def client_tickets(request):
         try:
             # Requête modifiée pour filtrer les réservations confirmées
             cursor.execute("""
-                SELECT t.numero_du_ticket, v.numero_voyage, t.nom_voyageur, 
-                       t.date_creation, v.ville_depart, v.ville_arrivee,
-                       v.date_depart, v.heure_depart, r.statut
+                SELECT DISTINCT t.numero_du_ticket, v.numero_voyage, t.nom_voyageur, 
+                    t.date_creation, v.ville_depart, v.ville_arrivee,
+                    v.date_depart, v.heure_depart, r.statut
                 FROM ticket t
                 JOIN reservation r ON t.nom_voyageur = r.nom_complet_client
                 JOIN voyage v ON r.id_voyage = v.id_voyage
                 WHERE r.id_client = %s AND r.statut = 'confirmé'
                 ORDER BY t.date_creation DESC
             """, [client_id])
+
             
             tickets = cursor.fetchall()
             
@@ -831,10 +897,10 @@ def client_tickets(request):
 
 
 def detail_ticket(request, numero_ticket):
-    if request.session.get('user_role') != 'client':
+    if request.session.get('user_role') != 'client' or not request.session.get('id_client'):
         return redirect('login')
 
-    client_id = request.session.get('user_id')
+    client_id = request.session.get('id_client')
     if not client_id:
         return redirect('login')
 
